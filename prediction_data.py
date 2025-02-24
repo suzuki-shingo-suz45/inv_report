@@ -1,6 +1,7 @@
 import yfinance as yf
 from prophet import Prophet
 import pandas as pd
+import json
 from datetime import datetime, timedelta
 
 # 現在の日付を取得
@@ -34,8 +35,11 @@ for name, ticker in tickers.items():
     future = model.make_future_dataframe(periods=30)
     forecast = model.predict(future)
     
-    # 予測結果保存（実データ+予測データ）
-    forecast_data[name] = forecast[['ds', 'yhat']]
-    forecast.to_csv(f'{name}_forecast.csv', index=False)
+    # 予測結果を辞書形式で保存
+    forecast_data[name] = forecast[['ds', 'yhat']].to_dict(orient='records')  # 予測結果を辞書形式で格納
 
-print("データ取得と予測が完了しました。")
+# forecast_dataをJSON形式で保存
+with open('https://inv.suz45.net/program/inv_report/forecast_data.json', 'w') as f:
+    json.dump(forecast_data, f, indent=4)
+
+print("データ取得と予測が完了し、forecast_data.jsonに保存しました。")
